@@ -23,50 +23,43 @@ if (!defined('WT_WEBTREES')) {
 	exit;
 }
 
-class PlaceLocation {
+class FactPlace {
 	private $fact;
 	private $data;
+	private $lat, $lon;
 
 	public function __construct($fact) {
 		$this->fact = $fact;
-/*
-		if (!$fact->getPlace()->isEmpty()) {
-			// First look to see if the lat/lon is hardcoded in the gedcom
-			$gedcom_lat = preg_match("/\d LATI (.*)/", $fact->getGedcom(), $match1);
-			$gedcom_lon = preg_match("/\d LONG (.*)/", $fact->getGedcom(), $match1);
-			if ($gedcom_lat && $gedcom_lon) { 
-				// If it's hardcoded, we're done.
-				$lat = $gedcom_lat; 
-				$lon = $gedcom_lon; 
-			} else {
-				// Otherwise, look in the database to see if we have a value stored for it.
-				$place = $fact->getPlace()->getGedcomName();
-			}
-		}
-*/
-		$this->buildData($fact->getPlacE()->getGedcomName());
+
+		//$this->buildData($fact->getPlace()->getGedcomName());
+		$this->getLatLon();
 	}
 	public function knownLatLon() {
-		return ($this->data && $this->data->pl_lati && $this->data->pl_long);
+		//return ($this->data && $this->data->pl_lati && $this->data->pl_long);
+		return ($this->lat && $this->lon);
 	}
 	public function getLat($format) {
-		if (!$this->data) return '';
 		switch($format) {
 		case 'signed':
-			return str_replace('N','',str_replace('S','-',$this->data->pl_lati));
+			return str_replace('N','',str_replace('S','-',$this->lat));
 		default:
-			return $this->data->pl_lati;
+			return $this->lat;
 		}
 	}
 
 	public function getLon($format) {
-		if (!$this->data) return '';
 		switch($format) {
 		case 'signed':
-			return str_replace('W','-',str_replace('E','',$this->data->pl_long));
+			return str_replace('W','-',str_replace('E','',$this->lon));
 		default:
-			return $this->data->pl_long;
+			return $this->lon;
 		}
+	}
+
+
+	// Return a one line summary from the fact
+	public function shortSummary() {
+		return $this->fact->summary();
 	}
 
 	public function getPlaceName() {
@@ -128,5 +121,51 @@ class PlaceLocation {
          ->execute(array($place_id))
          ->fetchOneRow();
 				
+	}
+
+	// Populate this objects lat/lon values, if possible
+	private function getLatLon() {
+		$fact = $this->fact;
+		if (!$fact->getPlace()->isEmpty()) {
+			// Options in order of priority
+			//  1 - Lat/Lon are explicitly set in gedcom
+			//  2 - Placename in gedcom has lat/lon in placelocation table
+			//  3 - Nominatim has a lat/lon for place
+			//  4 - Placename's parents have lat/lon in placelocation table
+			  
+			// First look to see if the lat/lon is hardcoded in the gedcom
+			$gedcom_lat = preg_match("/\d LATI (.*)/", $fact->getGedcom(), $match1);
+			$gedcom_lon = preg_match("/\d LONG (.*)/", $fact->getGedcom(), $match1);
+			if ($gedcom_lat && $gedcom_lon) { 
+				// If it's hardcoded, we're done.
+				$this->lat = $gedcom_lat; 
+				$this->lon = $gedcom_lon; 
+				return;
+			} 
+			// Next, check if the place has lat/lon in the database
+			
+			// Next, query nominatim
+			$res = $this->queryNominatim($this->fact->getPlace()->getGedcomName());
+			if ($res) {
+				$this->lat = $res[0]->lat;
+				$this->lon = $res[0]->lon;
+			}
+
+		}
+	}
+
+	private function queryNominatim($query) {
+		$queryString = urlencode($query);
+
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_URL, "http://nominatim.openstreetmap.org/search/?format=json&limit=1&q=$queryString");
+		$response = curl_exec($ch);
+		curl_close($ch);
+
+		if ($response === false) {
+			throw new Exception('Nominatim query failed');
+		}
+		return json_decode($response);
 	}
 }

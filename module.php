@@ -83,8 +83,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		$facts = $controller->record->getFacts();
 		$places = array();
 		foreach($facts as $fact) {
-			$pl = new PlaceLocation($fact);
-			array_push($places, $pl);
+			array_push($places, new FactPlace($fact));
 		}
 
 		$this->drawMap($places);
@@ -98,7 +97,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/leaflet.css" rel="stylesheet">';
 		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/osm-module.css" rel="stylesheet">';
 
-		require_once WT_MODULES_DIR.$this->getName().'/classes/PlaceLocation.php';
+		require_once WT_MODULES_DIR.$this->getName().'/classes/FactPlace.php';
 	}
 
 	private function drawMap($places) {
@@ -116,7 +115,8 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		// Populate the leaflet map with markers
 		foreach($places as $place) {
 			if ($place->knownLatLon()) {
-				echo "L.marker(".$place->getLatLonJSArray().").addTo(map);" . "\n";
+				echo "var marker = L.marker(".$place->getLatLonJSArray().").addTo(map);" . "\n";
+				echo "marker.bindPopup('".$place->shortSummary()."');" . "\n";
 			}
 		}
 
