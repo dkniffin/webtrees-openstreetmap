@@ -9,6 +9,7 @@ if (!defined('WT_WEBTREES')) {
 }
 
 class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {	
+
 	// Extend WT_Module. This title should be normalized when this module will be added officially
 	public function getTitle() {
 		return /* I18N: Name of a module */ WT_I18N::translate('OpenStreetMap');
@@ -28,7 +29,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 	// Implement WT_Module_Tab
 	public function getTabContent() {
 		global $controller;
-		$this->pedigree_map();
+		$this->individual_map();
 
 	}
 
@@ -69,6 +70,24 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		
 		$this->includes($controller);
 		$this->drawMap();
+	}
+
+	private function individual_map() {
+		global $controller;
+
+		$this->includes($controller);
+
+
+		## This still needs some work. We'll probably want to copy this directly 
+		##   from googlemaps
+		$facts = $controller->record->getFacts();
+		$places = array();
+		foreach($facts as $fact) {
+			$pl = new PlaceLocation($fact);
+			array_push($places, $pl);
+		}
+
+		$this->drawMap($places);
 
 	}
 
@@ -78,11 +97,29 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		// Leaflet CSS
 		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/leaflet.css" rel="stylesheet">';
 		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/osm-module.css" rel="stylesheet">';
+
+		require_once WT_MODULES_DIR.$this->getName().'/classes/PlaceLocation.php';
 	}
 
-	private function drawMap() {
+	private function drawMap($places) {
+		$attributionString = 'Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/license      s/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>';
 		echo '<div id=map>';
 		echo '</div>';
-		echo '<script src="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/js/osm-module.js"></script>';
+		echo "<script>
+		var map = L.map('map').setView([25,0], 3);
+		L.tileLayer('http://{s}.tiles.mapbox.com/v3/oddityoverseer13.ino7n4nl/{z}/{x}/{y}.png', {
+			attribution: '$attributionString',
+			maxZoom: 18
+		}).addTo(map);
+		";
+
+		// Populate the leaflet map with markers
+		foreach($places as $place) {
+			if ($place->knownLatLon()) {
+				echo "L.marker(".$place->getLatLonJSArray().").addTo(map);" . "\n";
+			}
+		}
+
+		echo '</script>';
 	}
 }
