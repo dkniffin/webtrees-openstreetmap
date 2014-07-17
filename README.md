@@ -8,5 +8,5 @@ via git
 
 via zip/tarball
 -------
-You can also download either the [zip](https://github.com/oddityoverseer13/webtrees-openstreetmap/archive/v1.0.zip) or [tarball](https://github.com/oddityoverseer13/webtrees-openstreetmap/archive/v1.0.tar.gz) version of the code and unpack it into the webtrees module directory, and rename the directory to 'openstreetmap'.
+You can also download either the [zip](https://github.com/oddityoverseer13/webtrees-openstreetmap/archive/master.zip) or [tarball](https://github.com/oddityoverseer13/webtrees-openstreetmap/archive/master.tar.gz) version of the code and unpack it into the webtrees module directory, and rename the directory to 'openstreetmap'.
 
