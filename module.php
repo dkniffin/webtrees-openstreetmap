@@ -105,7 +105,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		echo '<div id=map>';
 		echo '</div>';
 		echo "<script>
-		var map = L.map('map').setView([25,0], 3);
+		var map = L.map('map').fitWorld().setZoom(2);
 		L.tileLayer('http://{s}.tiles.mapbox.com/v3/oddityoverseer13.ino7n4nl/{z}/{x}/{y}.png', {
 			attribution: '$attributionString',
 			maxZoom: 18
