@@ -24,7 +24,7 @@ if (!defined('WT_WEBTREES')) {
 }
 
 class FactPlace {
-	private $fact;
+	public $fact;
 	private $data;
 	private $lat, $lon;
 	private $fqpn; // Fully Qualified Place Name
@@ -136,4 +136,9 @@ class FactPlace {
 		}
 		return json_decode($response);
 	}
+
+	public static function CompareDate(FactPlace $a, FactPlace $b) {
+		return WT_Fact::CompareDate($a->fact, $b->fact);
+	}
+
 }

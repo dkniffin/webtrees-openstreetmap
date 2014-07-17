@@ -86,6 +86,9 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 			array_push($places, new FactPlace($fact));
 		}
 
+		// sort facts by date
+		usort($places, array('FactPlace','CompareDate'));
+
 		$this->drawMap($places);
 
 	}
@@ -112,13 +115,20 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		}).addTo(map);
 		";
 
+		// Set up polyline
+		echo "var polyline = L.polyline([]).addTo(map);" . "\n";
+
 		// Populate the leaflet map with markers
 		foreach($places as $place) {
 			if ($place->knownLatLon()) {
 				echo "var marker = L.marker(".$place->getLatLonJSArray().").addTo(map);" . "\n";
 				echo "marker.bindPopup('".$place->shortSummary()."');" . "\n";
+
+				// Append it to the polyline
+				echo "polyline.addLatLng(".$place->getLatLonJSArray().");" . "\n";
 			}
 		}
+
 
 		echo '</script>';
 	}
