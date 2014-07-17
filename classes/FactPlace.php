@@ -27,6 +27,7 @@ class FactPlace {
 	private $fact;
 	private $data;
 	private $lat, $lon;
+	private $fqpn; // Fully Qualified Place Name
 
 	public function __construct($fact) {
 		$this->fact = $fact;
@@ -70,69 +71,10 @@ class FactPlace {
 		return '['.$this->getLat('signed').','.$this->getLon('signed').']';
 	}
 
-	private function rem_prefix_postfix_from_placename($prefix_list, $postfix_list, $place, $placelist) {
-      if ($prefix_list && $postfix_list) {
-         foreach (explode (";", $prefix_list) as $prefix) {
-            foreach (explode (";", $postfix_list) as $postfix) {
-               if ($prefix && $postfix && substr($place, 0, strlen($prefix)+1)==$prefix.' ' && substr($place, -strlen($postfix)-1)==' '.$postfix) {
-                  $placelist[] = substr($place, strlen($prefix)+1, strlen($place)-strlen($prefix)-strlen($postfix)-2);
-               }
-            }
-         }
-      }
-      return $placelist;
-   }
-
-	private function create_possible_place_names($placename, $level) {
-      $retlist = array();
-/*
-      if ($level<=9) {
-         $retlist = $this->rem_prefix_postfix_from_placename($this->getSetting('GM_PREFIX_' . $level), $this->getSetting('GM_POSTFIX_' . $level), $placename, $retlist); // Remove both
-         $retlist = $this->rem_prefix_from_placename($this->getSetting('GM_PREFIX_' . $level), $placename, $retlist); // Remove prefix
-         $retlist = $this->rem_postfix_from_placename($this->getSetting('GM_POSTFIX_' . $level), $placename, $retlist); // Remove suffix
-      }
-*/
-      $retlist[]=$placename; // Exact
-
-      return $retlist;
-   }
-
-
-	private function buildData($place) {
-		$parent = explode (',', $place);
-      $parent = array_reverse($parent);
-      $place_id = 0;
-      for ($i=0; $i<count($parent); $i++) {
-         $parent[$i] = trim($parent[$i]);
-         if (empty($parent[$i])) $parent[$i]='unknown';// GoogleMap module uses "unknown" while GEDCOM uses , ,
-         $placelist = $this->create_possible_place_names($parent[$i], $i+1);
-         foreach ($placelist as $placename) {
-            $pl_id=
-               WT_DB::prepare("SELECT pl_id FROM `##placelocation` WHERE pl_level=? AND pl_parent_id=? AND pl_place LIKE ? ORDER BY pl_place")
-               ->execute(array($i, $place_id, $placename))
-               ->fetchOne();
-            if (!empty($pl_id)) break;
-         }
-         if (empty($pl_id)) break;
-         $place_id = $pl_id;
-      }
-
-      $this->data = WT_DB::prepare("SELECT pl_lati, pl_long FROM `##placelocation` WHERE pl_id=? ORDER BY pl_place")
-         ->execute(array($place_id))
-         ->fetchOneRow();
-				
-	}
-
 	// Populate this objects lat/lon values, if possible
 	private function getLatLon() {
 		$fact = $this->fact;
 		if (!$fact->getPlace()->isEmpty()) {
-			// Options in order of priority
-			//  1 - Lat/Lon are explicitly set in gedcom
-			//  2 - Placename in gedcom has lat/lon in placelocation table
-			//  3 - Nominatim has a lat/lon for place
-			//  4 - Placename's parents have lat/lon in placelocation table
-			  
 			// First look to see if the lat/lon is hardcoded in the gedcom
 			$gedcom_lat = preg_match("/\d LATI (.*)/", $fact->getGedcom(), $match1);
 			$gedcom_lon = preg_match("/\d LONG (.*)/", $fact->getGedcom(), $match1);
@@ -142,14 +84,40 @@ class FactPlace {
 				$this->lon = $gedcom_lon; 
 				return;
 			} 
-			// Next, check if the place has lat/lon in the database
+
+			// Next, get the lat/lon from the database
+			$data = WT_DB::prepare("
+				SELECT
+			      CONCAT_WS(', ', t1.pl_place, t2.pl_place, t3.pl_place, t4.pl_place, t5.pl_place, t6.pl_place) as fqpn,
+			      COALESCE(t1.pl_long,t2.pl_long,t3.pl_long,t4.pl_long,t5.pl_long,t6.pl_long) as pl_long,
+				   COALESCE(t1.pl_lati,t2.pl_lati,t3.pl_lati,t4.pl_lati,t5.pl_lati,t6.pl_lati) as pl_lati
+				FROM `##placelocation` as t1 
+				LEFT JOIN `##placelocation` as t2 on t1.pl_parent_id = t2.pl_id
+				LEFT JOIN `##placelocation` as t3 on t2.pl_parent_id = t3.pl_id
+				LEFT JOIN `##placelocation` as t4 on t3.pl_parent_id = t4.pl_id
+				LEFT JOIN `##placelocation` as t5 on t4.pl_parent_id = t5.pl_id
+				LEFT JOIN `##placelocation` as t6 on t5.pl_parent_id = t6.pl_id
+				HAVING fqpn=?;
+			   ")
+					->execute(array($fact->getPlace()->getGedcomName()))
+					->fetchOneRow();
+			if ($data) {
+				if ($data->pl_long && $data->pl_lati) {
+					$this->lat = $data->pl_lati;
+					$this->lon = $data->pl_long;
+				}
+				if ($data->fqpn) {
+					$this->fqpn = $data->fqpn;
+				}
+			}
 			
 			// Next, query nominatim
-			$res = $this->queryNominatim($this->fact->getPlace()->getGedcomName());
-			if ($res) {
-				$this->lat = $res[0]->lat;
-				$this->lon = $res[0]->lon;
-			}
+			// NOTE: This is too slow. We don't want to do this at page-load.
+			#$res = $this->queryNominatim($this->fact->getPlace()->getGedcomName());
+			#if ($res) {
+				#$this->lat = $res[0]->lat;
+				#$this->lon = $res[0]->lon;
+			#}
 
 		}
 	}
