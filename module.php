@@ -82,8 +82,17 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		##   from googlemaps
 		$facts = $controller->record->getFacts();
 		$places = array();
+		$someplacedata = false;
 		foreach($facts as $fact) {
-			array_push($places, new FactPlace($fact));
+			$placefact = new FactPlace($fact);
+			array_push($places, $placefact);
+			if ($placefact->knownLatLon()) $someplacedata = true;
+		}
+
+		// If no places, display message and quit
+		if (!$someplacedata) {
+			echo "No map data for this person." . "\n";
+			return;
 		}
 
 		// sort facts by date
