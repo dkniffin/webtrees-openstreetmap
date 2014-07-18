@@ -121,7 +121,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		";
 
 		// Set up polyline
-		echo "var polyline = L.polyline([]).addTo(map);" . "\n";
+		echo "var polyline = L.polyline([]);" . "\n";
 
 		// Set up markercluster
 		echo "var markers = new L.MarkerClusterGroup();" . "\n";
@@ -140,7 +140,16 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 			}
 		}
 
+		// Add markercluster to map
 		echo "map.addLayer(markers);" . "\n";
+
+		// Add polyline to map
+		echo "polyline.addTo(map);" . "\n";
+
+		// Zoom to bounds of polyline
+		echo "map.fitBounds(polyline.getBounds());" . "\n";
+
+		echo "map.invalidateSize();" . "\n";
 
 		echo '</script>';
 	}
