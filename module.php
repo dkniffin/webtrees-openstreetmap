@@ -100,6 +100,11 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/leaflet.css" rel="stylesheet">';
 		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/osm-module.css" rel="stylesheet">';
 
+		// Leaflet markercluster
+		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/MarkerCluster.Default.css" rel="stylesheet">';
+		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/MarkerCluster.css" rel="stylesheet">';
+		echo '<script src="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/js/leaflet/leaflet.markercluster.js"></script>';
+
 		require_once WT_MODULES_DIR.$this->getName().'/classes/FactPlace.php';
 	}
 
@@ -118,17 +123,24 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		// Set up polyline
 		echo "var polyline = L.polyline([]).addTo(map);" . "\n";
 
+		// Set up markercluster
+		echo "var markers = new L.MarkerClusterGroup();" . "\n";
+
 		// Populate the leaflet map with markers
 		foreach($places as $place) {
 			if ($place->knownLatLon()) {
-				echo "var marker = L.marker(".$place->getLatLonJSArray().").addTo(map);" . "\n";
+				echo "var marker = L.marker(".$place->getLatLonJSArray().");" . "\n";
 				echo "marker.bindPopup('".$place->shortSummary()."');" . "\n";
+
+				// Add to markercluster
+				echo "markers.addLayer(marker);" . "\n";
 
 				// Append it to the polyline
 				echo "polyline.addLatLng(".$place->getLatLonJSArray().");" . "\n";
 			}
 		}
 
+		echo "map.addLayer(markers);" . "\n";
 
 		echo '</script>';
 	}
