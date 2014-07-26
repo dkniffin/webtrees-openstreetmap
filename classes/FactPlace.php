@@ -89,8 +89,18 @@ class FactPlace {
 			$data = WT_DB::prepare("
 				SELECT
 			      CONCAT_WS(', ', t1.pl_place, t2.pl_place, t3.pl_place, t4.pl_place, t5.pl_place, t6.pl_place) as fqpn,
-			      COALESCE(t1.pl_long,t2.pl_long,t3.pl_long,t4.pl_long,t5.pl_long,t6.pl_long) as pl_long,
-				   COALESCE(t1.pl_lati,t2.pl_lati,t3.pl_lati,t4.pl_lati,t5.pl_lati,t6.pl_lati) as pl_lati
+					COALESCE(NULLIF(t1.pl_long,'E0'),
+						NULLIF(t2.pl_long,'E0'),
+						NULLIF(t3.pl_long,'E0'),
+						NULLIF(t4.pl_long,'E0'),
+						NULLIF(t5.pl_long,'E0'),
+						NULLIF(t6.pl_long,'E0')) as pl_long,
+					COALESCE(NULLIF(t1.pl_lati,'N0'),
+						NULLIF(t2.pl_lati,'N0'),
+						NULLIF(t3.pl_lati,'N0'),
+						NULLIF(t4.pl_lati,'N0'),
+						NULLIF(t5.pl_lati,'N0'),
+						NULLIF(t6.pl_lati,'N0')) as pl_lati
 				FROM `##placelocation` as t1 
 				LEFT JOIN `##placelocation` as t2 on t1.pl_parent_id = t2.pl_id
 				LEFT JOIN `##placelocation` as t3 on t2.pl_parent_id = t3.pl_id
