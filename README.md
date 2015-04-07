@@ -1,5 +1,7 @@
 This is a [webtrees](http://webtrees.net) plugin for displaying location data on openstreetmap tiles, hosted by mapbox, and displayed via leaflet.
 
+![Screenshot](screenshot.png)
+
 Requirements
 ============
 This module requires webtrees 1.5+.
