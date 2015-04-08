@@ -144,19 +144,21 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 				// Add to markercluster
 				echo "markers.addLayer(marker);" . "\n";
 
-				// Append it to the polyline
-				echo "polyline.addLatLng(".$place->getLatLonJSArray().");" . "\n";
+				if ($place->fact->getDate()->isOk()) {
+					// Append it to the polyline
+					echo "polyline.addLatLng(".$place->getLatLonJSArray().");" . "\n";
+				}
 			}
 		}
 
 		// Add markercluster to map
-		echo "map.addLayer(markers);" . "\n";
+		echo "var l = map.addLayer(markers);" . "\n";
 
 		// Add polyline to map
 		echo "polyline.addTo(map);" . "\n";
 
 		// Zoom to bounds of polyline
-		echo "map.fitBounds(polyline.getBounds());" . "\n";
+		echo "map.fitBounds(markers.getBounds());" . "\n";
 
 		echo "map.invalidateSize();" . "\n";
 
