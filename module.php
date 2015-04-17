@@ -8,7 +8,7 @@ if (!defined('WT_WEBTREES')) {
 	exit;
 }
 
-class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {	
+class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 
 	// Extend WT_Module. This title should be normalized when this module will be added officially
 	public function getTitle() {
@@ -19,7 +19,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 	public function getDescription() {
 		return /* I18N: Description of the “OSM” module */ WT_I18N::translate('Show the location of places and events using OpenStreetMap (OSM)');
 	}
-	
+
 	// Implement WT_Module_Tab
 	public function defaultTabOrder() {
 		return 81;
@@ -36,7 +36,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 	// Implement WT_Module_Tab
 	public function hasTabContent() {
 		global $SEARCH_SPIDER;
-			
+
 		return !$SEARCH_SPIDER;
 	}
 	// Implement WT_Module_Tab
@@ -67,7 +67,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 	private function pedigree_map() {
 		global $controller;
 		$controller = new WT_Controller_Pedigree();
-		
+
 		$this->includes($controller);
 		$this->drawMap();
 	}
@@ -78,28 +78,76 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		$this->includes($controller);
 
 
-		## This still needs some work. We'll probably want to copy this directly 
+		## This still needs some work. We'll probably want to copy this directly
 		##   from googlemaps
-		$facts = $controller->record->getFacts();
-		$places = array();
-		$someplacedata = false;
-		foreach($facts as $fact) {
-			$placefact = new FactPlace($fact);
-			array_push($places, $placefact);
-			if ($placefact->knownLatLon()) $someplacedata = true;
-		}
+		list($events, $geodata) = $this->getEvents();
 
 		// If no places, display message and quit
-		if (!$someplacedata) {
+		if (!$geodata) {
 			echo "No map data for this person." . "\n";
 			return;
 		}
 
-		// sort facts by date
-		usort($places, array('FactPlace','CompareDate'));
+		$this->drawMap($events);
 
-		$this->drawMap($places);
+	}
 
+	private function getEvents() {
+		global $controller;
+
+		$events = array(); # Array of indivuals/events
+		$geodata = false; # Boolean indicating if we have any geo-tagged data
+
+		$thisPerson = $controller->record;
+
+		### Get all people that we want events for ###
+		$people = array();
+		array_push($people, $thisPerson); # Self
+		foreach($thisPerson->getChildFamilies() as $family) {
+			# Parents
+			foreach($family->getSpouses() as $parent) {
+				array_push($people, $parent);
+			}
+
+			# Siblings
+			foreach($family->getChildren() as $child) {
+				if ( ! $child === $thisPerson) {
+					array_push($people, $child);
+				}
+			}
+
+		}
+		foreach($thisPerson->getSpouseFamilies() as $family) {
+			# Spouse
+			foreach($family->getSpouses() as $spouse) {
+				if ( ! $spouse === $thisPerson) {
+					array_push($people, $spouse);
+				}
+			}
+
+			# Children
+			foreach($family->getChildren() as $child) {
+				array_push($people, $child);
+			}
+
+		}
+
+		# Map each person to their facts
+		foreach($people as $person) {
+			$xref = $person->getXref();
+			$events[$xref] = array();
+			foreach($person->getFacts() as $fact) {
+				$placefact = new FactPlace($fact);
+				array_push($events[$xref], $placefact);
+				if ($placefact->knownLatLon()) $geodata = true;
+			}
+
+			// sort facts by date
+			usort($events[$xref], array('FactPlace','CompareDate'));
+		}
+
+
+		return array($events,$geodata);
 	}
 
 	private function includes($controller) {
@@ -117,7 +165,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		require_once WT_MODULES_DIR.$this->getName().'/classes/FactPlace.php';
 	}
 
-	private function drawMap($places) {
+	private function drawMap($eventsMap) {
 		$attributionString = 'Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/license      s/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>';
 		echo '<div id=map>';
 		echo '</div>';
@@ -136,17 +184,19 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		echo "var markers = new L.MarkerClusterGroup();" . "\n";
 
 		// Populate the leaflet map with markers
-		foreach($places as $place) {
-			if ($place->knownLatLon()) {
-				echo "var marker = L.marker(".$place->getLatLonJSArray().");" . "\n";
-				echo "marker.bindPopup('".$place->shortSummary()."');" . "\n";
+		foreach($eventsMap as $xref => $personEvents) {
+			foreach($personEvents as $event) {
+				if ($event->knownLatLon()) {
+					echo "var marker = L.marker(".$event->getLatLonJSArray().");" . "\n";
+					echo "marker.bindPopup('".$event->shortSummary()."');" . "\n";
 
-				// Add to markercluster
-				echo "markers.addLayer(marker);" . "\n";
+					// Add to markercluster
+					echo "markers.addLayer(marker);" . "\n";
 
-				if ($place->fact->getDate()->isOk()) {
-					// Append it to the polyline
-					echo "polyline.addLatLng(".$place->getLatLonJSArray().");" . "\n";
+					if ($event->fact->getDate()->isOk()) {
+						// Append it to the polyline
+						echo "polyline.addLatLng(".$event->getLatLonJSArray().");" . "\n";
+					}
 				}
 			}
 		}
