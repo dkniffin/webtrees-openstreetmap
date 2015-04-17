@@ -162,6 +162,11 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		echo '<link type="text/css" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/MarkerCluster.css" rel="stylesheet">';
 		echo '<script src="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/js/leaflet/leaflet.markercluster.js"></script>';
 
+		// Leaflet Fontawesome markers
+		echo '<link rel="stylesheet" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/font-awesome.min.css">';
+		echo '<link rel="stylesheet" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/leaflet.awesome-markers.css">';
+		echo '<script src="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/js/leaflet/leaflet.awesome-markers.min.js"></script>';
+
 		require_once WT_MODULES_DIR.$this->getName().'/classes/FactPlace.php';
 	}
 
@@ -183,11 +188,18 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		// Set up markercluster
 		echo "var markers = new L.MarkerClusterGroup();" . "\n";
 
+		$colors = array('blue', 'red', 'purple', 'green', 'orange', 'cadetblue', 'darkred', 'darkpuple', 'darkgreen');
+
+		$color_i = 0;
 		// Populate the leaflet map with markers
 		foreach($eventsMap as $xref => $personEvents) {
 			foreach($personEvents as $event) {
 				if ($event->knownLatLon()) {
-					echo "var marker = L.marker(".$event->getLatLonJSArray().");" . "\n";
+					echo "var icon = L.AwesomeMarkers.icon({
+						icon: 'coffee',
+						markerColor: '" . $colors[$color_i] . "'
+					});";
+					echo "var marker = L.marker(".$event->getLatLonJSArray().", {icon: icon});" . "\n";
 					echo "marker.bindPopup('".$event->shortSummary()."');" . "\n";
 
 					// Add to markercluster
@@ -199,6 +211,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 					}
 				}
 			}
+			$color_i++;
 		}
 
 		// Add markercluster to map
