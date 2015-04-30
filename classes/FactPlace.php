@@ -78,12 +78,12 @@ class FactPlace {
 			// First look to see if the lat/lon is hardcoded in the gedcom
 			$gedcom_lat = preg_match("/\d LATI (.*)/", $fact->getGedcom(), $match1);
 			$gedcom_lon = preg_match("/\d LONG (.*)/", $fact->getGedcom(), $match1);
-			if ($gedcom_lat && $gedcom_lon) { 
+			if ($gedcom_lat && $gedcom_lon) {
 				// If it's hardcoded, we're done.
-				$this->lat = $gedcom_lat; 
-				$this->lon = $gedcom_lon; 
+				$this->lat = $gedcom_lat;
+				$this->lon = $gedcom_lon;
 				return;
-			} 
+			}
 
 			// Next, get the lat/lon from the database
 			$data = WT_DB::prepare("
@@ -101,7 +101,7 @@ class FactPlace {
 						NULLIF(t4.pl_lati,'N0'),
 						NULLIF(t5.pl_lati,'N0'),
 						NULLIF(t6.pl_lati,'N0')) as pl_lati
-				FROM `##placelocation` as t1 
+				FROM `##placelocation` as t1
 				LEFT JOIN `##placelocation` as t2 on t1.pl_parent_id = t2.pl_id
 				LEFT JOIN `##placelocation` as t3 on t2.pl_parent_id = t3.pl_id
 				LEFT JOIN `##placelocation` as t4 on t3.pl_parent_id = t4.pl_id
@@ -120,7 +120,7 @@ class FactPlace {
 					$this->fqpn = $data->fqpn;
 				}
 			}
-			
+
 			// Next, query nominatim
 			// NOTE: This is too slow. We don't want to do this at page-load.
 			#$res = $this->queryNominatim($this->fact->getPlace()->getGedcomName());

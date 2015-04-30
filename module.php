@@ -182,23 +182,29 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		}).addTo(map);
 		";
 
-		// Set up polyline
-		echo "var polyline = L.polyline([]);" . "\n";
-
 		// Set up markercluster
 		echo "var markers = new L.MarkerClusterGroup();" . "\n";
 
-		$colors = array('#D60500', '#0C448C', '#009E30', '#D6A000', '#008C65', '#AB0061', '#5B088F', '#D66500');
+		$colors = array('#0C448C', '#D60500',  '#009E30', '#D6A000', '#008C65', '#AB0061', '#5B088F', '#D66500');
+		$event_options_map = array(
+			'BIRT' => array('icon' => 'birthday-cake'),
+			'RESI' => array('icon' => 'home'),
+			'CENS' => array('icon' => 'users'),
+			'GRAD' => array('icon' => 'graduation-cap'),
+			'OCCU' => array('icon' => 'briefcase')
+			);
 
 		$color_i = 0;
 		// Populate the leaflet map with markers
 		foreach($eventsMap as $xref => $personEvents) {
+			// Set up polyline
+			echo "var polyline = L.polyline([], {color: '" . $colors[$color_i] . "'});" . "\n";
 			foreach($personEvents as $event) {
 				if ($event->knownLatLon()) {
-					echo "var icon = L.VectorMarkers.icon({
-						icon: 'bed',
-						markerColor: '" . $colors[$color_i] . "'
-					});";
+					$tag = $event->fact->getTag();
+					$options = array_key_exists($tag,$event_options_map) ? $event_options_map[$tag] : array('icon' => 'circle');
+					$options['markerColor'] = $colors[$color_i];
+					echo "var icon = L.VectorMarkers.icon(".json_encode($options).");";
 					echo "var marker = L.marker(".$event->getLatLonJSArray().", {icon: icon});" . "\n";
 					echo "marker.bindPopup('".$event->shortSummary()."');" . "\n";
 
@@ -210,15 +216,15 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 						echo "polyline.addLatLng(".$event->getLatLonJSArray().");" . "\n";
 					}
 				}
+
+				// Add polyline to map
+				echo "polyline.addTo(map);" . "\n";
 			}
 			$color_i++;
 		}
 
 		// Add markercluster to map
 		echo "var l = map.addLayer(markers);" . "\n";
-
-		// Add polyline to map
-		echo "polyline.addTo(map);" . "\n";
 
 		// Zoom to bounds of polyline
 		echo "map.fitBounds(markers.getBounds());" . "\n";
