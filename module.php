@@ -199,6 +199,8 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		foreach($eventsMap as $xref => $personEvents) {
 			// Set up polyline
 			echo "var polyline = L.polyline([], {color: '" . $colors[$color_i] . "'});" . "\n";
+			usort($personEvents, array('FactPlace','CompareDate'));
+
 			foreach($personEvents as $event) {
 				if ($event->knownLatLon()) {
 					$tag = $event->fact->getTag();
