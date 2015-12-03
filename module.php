@@ -4,10 +4,8 @@ namespace vendor\WebtreesModules\OpenStreetMapModule;
 
 use Composer\Autoload\ClassLoader;
 use Fisharebest\Webtrees\Auth;
-use Fisharebest\Webtrees\Database;
 use Fisharebest\Webtrees\Filter;
 use Fisharebest\Webtrees\I18N;
-use Fisharebest\Webtrees\Individual;
 use Fisharebest\Webtrees\Module\AbstractModule;
 use Fisharebest\Webtrees\Module\ModuleTabInterface;
 
