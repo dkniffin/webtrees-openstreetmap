@@ -1,60 +1,85 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 'on');
+namespace vendor\WebtreesModules\OpenStreetMapModule;
 
-if (!defined('WT_WEBTREES')) {
-	header('HTTP/1.0 403 Forbidden');
-	exit;
-}
+use Composer\Autoload\ClassLoader;
+use Fisharebest\Webtrees\Auth;
+use Fisharebest\Webtrees\Filter;
+use Fisharebest\Webtrees\I18N;
+use Fisharebest\Webtrees\Module\AbstractModule;
+use Fisharebest\Webtrees\Module\ModuleTabInterface;
 
-class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
+class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 
-	// Extend WT_Module. This title should be normalized when this module will be added officially
+	var $directory;
+
+	public function __construct()
+	{
+		parent::__construct('OpenStreetMapModule');
+		$this->directory = WT_MODULES_DIR . $this->getName();
+		$this->action = Filter::get('mod_action');
+		// register the namespaces
+		$loader = new ClassLoader();
+		$loader->addPsr4('vendor\\WebtreesModules\\OpenStreetMapModule\\', $this->directory);
+		$loader->register();
+	}
+
+	// Extend AbstractModule. Unique internal name for this module. Must match the directory name
+	public function getName() {
+		return "openstreetmap";
+	}
+
+	// Extend AbstractModule. This title should be normalized when this module will be added officially
 	public function getTitle() {
-		return /* I18N: Name of a module */ WT_I18N::translate('OpenStreetMap');
+		return /* I18N: Name of a module */ I18N::translate('OpenStreetMap');
 	}
 
-	// Extend WT_Module
+	// Extend AbstractModule
 	public function getDescription() {
-		return /* I18N: Description of the “OSM” module */ WT_I18N::translate('Show the location of places and events using OpenStreetMap (OSM)');
+		return /* I18N: Description of the “OSM” module */ I18N::translate('Show the location of places and events using OpenStreetMap (OSM)');
 	}
 
-	// Implement WT_Module_Tab
+	// Extend AbstractModule
+	public function defaultAccessLevel() {
+		# Auth::PRIV_PRIVATE actually means public.
+		# Auth::PRIV_NONE - no acces to anybody.
+		return Auth::PRIV_PRIVATE;
+	}
+
+	// Implement ModuleTabInterface
 	public function defaultTabOrder() {
 		return 81;
 	}
 
-
-	// Implement WT_Module_Tab
+	// Implement ModuleTabInterface
 	public function getTabContent() {
 		global $controller;
 		$this->individual_map();
-
 	}
 
-	// Implement WT_Module_Tab
+	// Implement ModuleTabInterface
 	public function hasTabContent() {
 		global $SEARCH_SPIDER;
 
 		return !$SEARCH_SPIDER;
 	}
-	// Implement WT_Module_Tab
+
+	// Implement ModuleTabInterface
 	public function isGrayedOut() {
 		return false;
 	}
-	// Implement WT_Module_Tab
+
+	// Implement ModuleTabInterface
 	public function canLoadAjax() {
 		return true;
 	}
 
-	// Implement WT_Module_Tab
+	// Implement ModuleTabInterface
 	public function getPreLoadContent() {
 	}
 
 
-
-	// Extend WT_Module
+	// Extend AbstractModule
 	// Here, we define the actions available for the module
 	public function modAction($mod_action) {
 		switch($mod_action){
@@ -137,7 +162,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 			$xref = $person->getXref();
 			$events[$xref] = array();
 			foreach($person->getFacts() as $fact) {
-				$placefact = new FactPlace($fact);
+				$placefact = new \FactPlace($fact);
 				array_push($events[$xref], $placefact);
 				if ($placefact->knownLatLon()) $geodata = true;
 			}
@@ -167,7 +192,7 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		echo '<link rel="stylesheet" href="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/css/Leaflet.vector-markers.css">';
 		echo '<script src="', WT_STATIC_URL, WT_MODULES_DIR, 'openstreetmap/js/leaflet/Leaflet.vector-markers.min.js"></script>';
 
-		require_once WT_MODULES_DIR.$this->getName().'/classes/FactPlace.php';
+		require_once $this->directory.'/classes/FactPlace.php';
 	}
 
 	private function drawMap($eventsMap) {
@@ -236,3 +261,5 @@ class openstreetmap_WT_Module extends WT_Module implements WT_Module_Tab {
 		echo '</script>';
 	}
 }
+
+return new OpenStreetMapModule();

@@ -23,6 +23,9 @@ if (!defined('WT_WEBTREES')) {
 	exit;
 }
 
+use Fisharebest\Webtrees\Database;
+use Fisharebest\Webtrees\Fact;
+
 class FactPlace {
 	public $fact;
 	private $data;
@@ -86,7 +89,7 @@ class FactPlace {
 			}
 
 			// Next, get the lat/lon from the database
-			$data = WT_DB::prepare("
+			$data = Database::prepare("
 				SELECT
 			      CONCAT_WS(', ', t1.pl_place, t2.pl_place, t3.pl_place, t4.pl_place, t5.pl_place, t6.pl_place) as fqpn,
 					COALESCE(NULLIF(t1.pl_long,'E0'),
@@ -148,7 +151,7 @@ class FactPlace {
 	}
 
 	public static function CompareDate(FactPlace $a, FactPlace $b) {
-		return WT_Fact::CompareDate($a->fact, $b->fact);
+		return Fact::CompareDate($a->fact, $b->fact);
 	}
 
 }
