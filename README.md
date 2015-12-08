@@ -10,11 +10,16 @@ For now, this module relies on the Google Maps module. In the future, the plan i
 
 Installation
 ============
+via zip/tarball
+-------
+Download the plugin, based on your webtrees version, and unpack it into `webtrees/modules/openstreetmap`
+
+| Webtrees version | zip | tarball |
+|------------------|-----|---------|
+| >= 1.7.x         | [zip](https://github.com/dkniffin/webtrees-openstreetmap/releases/tag/v1.7.zip) | [tar.gz](https://github.com/dkniffin/webtrees-openstreetmap/releases/tag/v1.7.tar.gz) |
+| < 1.7.x          | [zip](https://github.com/dkniffin/webtrees-openstreetmap/releases/tag/v1.6.zip) | [tar.gz](https://github.com/dkniffin/webtrees-openstreetmap/releases/tag/v1.6.tar.gz) |
+
 via git
 -------
 `git clone https://github.com/oddityoverseer13/webtrees-openstreetmap.git <WEBTREES_MODULE_DIR>/openstreetmap`
-
-via zip/tarball
--------
-You can also download either the [zip](https://github.com/oddityoverseer13/webtrees-openstreetmap/archive/master.zip) or [tarball](https://github.com/oddityoverseer13/webtrees-openstreetmap/archive/master.tar.gz) version of the code and unpack it into the webtrees module directory, and rename the directory to 'openstreetmap'.
 
