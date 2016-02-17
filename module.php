@@ -201,7 +201,7 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 		echo '</div>';
 		echo "<script>
 		var map = L.map('map').fitWorld().setZoom(2);
-		L.tileLayer('http://{s}.tiles.mapbox.com/v3/oddityoverseer13.ino7n4nl/{z}/{x}/{y}.png', {
+		L.tileLayer('//{s}.tiles.mapbox.com/v3/oddityoverseer13.ino7n4nl/{z}/{x}/{y}.png', {
 			attribution: '$attributionString',
 			maxZoom: 18
 		}).addTo(map);
