@@ -16,8 +16,8 @@ Download the plugin, based on your webtrees version, and unpack it into `webtree
 
 | Webtrees version | zip | tarball |
 |------------------|-----|---------|
-| >= 1.7.x         | [zip](https://github.com/dkniffin/webtrees-openstreetmap/archive/v1.7.zip) | [tar.gz](https://github.com/dkniffin/webtrees-openstreetmap/releases/tag/v1.7.tar.gz) |
-| < 1.7.x          | [zip](https://github.com/dkniffin/webtrees-openstreetmap/archive/v1.6.zip) | [tar.gz](https://github.com/dkniffin/webtrees-openstreetmap/releases/tag/v1.6.tar.gz) |
+| >= 1.7.x         | [zip](https://github.com/dkniffin/webtrees-openstreetmap/archive/v1.7.zip) | [tar.gz](https://github.com/dkniffin/webtrees-openstreetmap/archive/v1.7.tar.gz) |
+| < 1.7.x          | [zip](https://github.com/dkniffin/webtrees-openstreetmap/archive/v1.6.zip) | [tar.gz](https://github.com/dkniffin/webtrees-openstreetmap/archive/v1.6.tar.gz) |
 
 via git
 -------
