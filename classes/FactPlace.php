@@ -80,11 +80,11 @@ class FactPlace {
 		if (!$fact->getPlace()->isEmpty()) {
 			// First look to see if the lat/lon is hardcoded in the gedcom
 			$gedcom_lat = preg_match("/\d LATI (.*)/", $fact->getGedcom(), $match1);
-			$gedcom_lon = preg_match("/\d LONG (.*)/", $fact->getGedcom(), $match1);
+			$gedcom_lon = preg_match("/\d LONG (.*)/", $fact->getGedcom(), $match2);
 			if ($gedcom_lat && $gedcom_lon) {
 				// If it's hardcoded, we're done.
-				$this->lat = $gedcom_lat;
-				$this->lon = $gedcom_lon;
+				$this->lat = $match1[1];
+				$this->lon = $match2[1];
 				return;
 			}
 
