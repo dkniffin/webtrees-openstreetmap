@@ -196,16 +196,37 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 	}
 
 	private function drawMap($eventsMap) {
-		$attributionString = 'Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/license      s/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>';
+		$attributionOsmString = 'Map data © <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors';
+		$attributionMapBoxString = 'Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>';
+
 		echo '<div id=map>';
 		echo '</div>';
 		echo "<script>
-		var map = L.map('map').fitWorld().setZoom(2);
-		L.tileLayer('//{s}.tiles.mapbox.com/v3/oddityoverseer13.ino7n4nl/{z}/{x}/{y}.png', {
-			attribution: '$attributionString',
+		
+                var osm = L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			attribution: '$attributionOsmString',
 			maxZoom: 18
-		}).addTo(map);
-		";
+		});
+		
+		var mapbox = L.tileLayer('//{s}.tiles.mapbox.com/v3/oddityoverseer13.ino7n4nl/{z}/{x}/{y}.png', {
+			attribution: '$attributionMapBoxString',
+			maxZoom: 18
+		});
+
+                var map = L.map('map').fitWorld().setZoom(2);
+
+		osm.addTo(map);
+                
+                var baseLayers = {
+                    'Mapbox': mapbox,
+                    'OpenStreetMap': osm
+                };
+
+                L.control.layers(baseLayers).addTo(map);
+                
+                ";
+                
+                
 
 		// Set up markercluster
 		echo "var markers = new L.MarkerClusterGroup();" . "\n";
