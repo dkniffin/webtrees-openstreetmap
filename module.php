@@ -136,7 +136,7 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 
 			# Siblings
 			foreach($family->getChildren() as $child) {
-				if ( ! $child === $thisPerson) {
+				if ( $child !== $thisPerson) {
 					array_push($people, $child);
 				}
 			}
@@ -145,7 +145,7 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 		foreach($thisPerson->getSpouseFamilies() as $family) {
 			# Spouse
 			foreach($family->getSpouses() as $spouse) {
-				if ( ! $spouse === $thisPerson) {
+				if ( $spouse !== $thisPerson) {
 					array_push($people, $spouse);
 				}
 			}
