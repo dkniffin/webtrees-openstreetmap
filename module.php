@@ -268,7 +268,7 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 				// Add polyline to map
 				echo "polyline.addTo(map);" . "\n";
 			}
-			$color_i++;
+			$color_i = ($color_i+1) % count($colors);
 		}
 
 		// Add markercluster to map
