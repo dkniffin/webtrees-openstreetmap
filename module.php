@@ -116,10 +116,10 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 		$this->drawMap($events, $personInfo);
 
 	}
-
-	private function getFullName($myPerson) {
+////// This function didn't work, I don't know why, can be deleted. ////////
+/*	private function getFullName($myPerson) {
 		return $myPerson->getAllNames()[0]['fullNN'];
-	}	
+	}*/	
 
 	private function getEvents() {
 		global $controller;
