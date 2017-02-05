@@ -202,12 +202,12 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 		echo '<div id=map>';
 		echo '</div>';
 		echo "<script>
-		
+
                 var osm = L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '$attributionOsmString',
 			maxZoom: 18
 		});
-		
+
 		var mapbox = L.tileLayer('//{s}.tiles.mapbox.com/v3/oddityoverseer13.ino7n4nl/{z}/{x}/{y}.png', {
 			attribution: '$attributionMapBoxString',
 			maxZoom: 18
@@ -216,17 +216,17 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
                 var map = L.map('map').fitWorld().setZoom(2);
 
 		osm.addTo(map);
-                
+
                 var baseLayers = {
                     'Mapbox': mapbox,
                     'OpenStreetMap': osm
                 };
 
                 L.control.layers(baseLayers).addTo(map);
-                
+
                 ";
-                
-                
+
+
 
 		// Set up markercluster
 		echo "var markers = new L.MarkerClusterGroup();" . "\n";
@@ -268,7 +268,7 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 				// Add polyline to map
 				echo "polyline.addTo(map);" . "\n";
 			}
-			$color_i++;
+			$color_i = ($color_i + 1) % count($colors);
 		}
 
 		// Add markercluster to map
