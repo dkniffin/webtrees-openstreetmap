@@ -207,7 +207,7 @@ class OpenStreetMapModule extends AbstractModule implements ModuleTabInterface {
 			if($xref!==$thisPerson->getXref()){		
 				$personInfo[$xref]='<b>'.I18N::translate($x['relation']).': </b>';	
 			}
-			$personInfo[$xref].='<a href="/individual.php?pid='.$xref.'&ged='.$_GET['ged'].'">'.$x['fullName'].'</a>';
+			$personInfo[$xref].='<a href="/individual.php?pid='.$xref.'&ged='.Filter::get('ged').'">'.$x['fullName'].'</a>';
 			$events[$xref] = array();
 			foreach($person->getFacts() as $fact) {
 				$placefact = new \FactPlace($fact);
